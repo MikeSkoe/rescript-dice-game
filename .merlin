@@ -1,0 +1,22 @@
+####{BSB GENERATED: NO EDIT
+FLG -ppx '/Users/mikhailskorykh/Documents/codes/rescript-jotai/node_modules/rescript/darwin/bsc.exe -as-ppx -bs-jsx 3'
+S /Users/mikhailskorykh/Documents/codes/rescript-jotai/node_modules/rescript/lib/ocaml
+B /Users/mikhailskorykh/Documents/codes/rescript-jotai/node_modules/rescript/lib/ocaml
+FLG -w +a-4-9-20-40-41-42-50-61-102
+S /Users/mikhailskorykh/Documents/codes/rescript-jotai/node_modules/@rescript/react/lib/ocaml
+B /Users/mikhailskorykh/Documents/codes/rescript-jotai/node_modules/@rescript/react/lib/ocaml
+S /Users/mikhailskorykh/Documents/codes/rescript-jotai/node_modules/@fattafatta/rescript-jotai/lib/ocaml
+B /Users/mikhailskorykh/Documents/codes/rescript-jotai/node_modules/@fattafatta/rescript-jotai/lib/ocaml
+S src/domain
+B lib/bs/src/domain
+S src/components
+B lib/bs/src/components
+S src/components/SumComp
+B lib/bs/src/components/SumComp
+S src/components/DiceComp
+B lib/bs/src/components/DiceComp
+S src/components/RestartComp
+B lib/bs/src/components/RestartComp
+S src/components/StepsComp
+B lib/bs/src/components/StepsComp
+####BSB GENERATED: NO EDIT}

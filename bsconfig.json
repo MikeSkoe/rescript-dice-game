@@ -13,6 +13,6 @@
     }
   ],
   "suffix": ".bs.js",
-  "bs-dependencies": [ "@rescript/react", "@fattafatta/rescript-jotai" ],
+  "bs-dependencies": [ "@rescript/react" ],
   "reason": { "react-jsx": 3 }
 }

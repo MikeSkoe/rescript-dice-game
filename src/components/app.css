@@ -1,3 +1,39 @@
-.diceRow {
+.floor {
+    width: 2em;
+    height: 2em;
+    border: 2px solid gray;
     display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.5em;
+}
+
+.target {
+    border-color: rgb(100, 100, 200);
+}
+
+.with-elevator {
+    position: relative;
+}
+
+.requested {
+    border-color: rgb(200, 100, 100);
+}
+
+.with-elevator::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: gray;
+    transform: translateX(2.5em);
+    border-left: 0.95em solid red;
+    border-right: 0.95em solid red;
+}
+
+.open::after {
+    border-left: 0.5em solid red;
+    border-right: 0.5em solid red;
 }

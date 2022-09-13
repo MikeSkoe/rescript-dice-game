@@ -1,30 +1,18 @@
-import React, { FC, PropsWithChildren } from 'react';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { make as App } from './components/App.bs';
 import reportWebVitals from './reportWebVitals';
-import { Provider } from 'jotai';
-import { useAtomsDevtools } from 'jotai/devtools';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const AtomsDevtools: FC<PropsWithChildren> = ({ children }) => {
-  useAtomsDevtools('demo')
-
-  return <>{children}</>
-}
-
 const MyApp = App as FC;
 
 root.render(
   <React.StrictMode>
-    <Provider>
-      <AtomsDevtools>
-        <MyApp />
-      </AtomsDevtools>
-    </Provider>
+    <MyApp />
   </React.StrictMode>
 );
 

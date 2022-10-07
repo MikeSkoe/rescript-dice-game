@@ -9,4 +9,6 @@ S src/domain
 B lib/bs/src/domain
 S src/components
 B lib/bs/src/components
+S src/category
+B lib/bs/src/category
 ####BSB GENERATED: NO EDIT}

@@ -1,77 +1,53 @@
-type direction =
-    | Waiting
-    | MovingTo(Floor.t);
+module type FLOOR = {
+    type t
 
-type t = {
-    direction: direction,
-    currentFloor: Floor.t,
-    requestedFloor: option<Floor.t>,
-};
-
-let empty = {
-    direction: Waiting,
-    currentFloor: Floor.empty,
-    requestedFloor: None,
+    let empty: t
+    let make: int => t
+    let moveToward: (t, t) => t
 }
 
-module Get = {
-    let isTargetFloor = ({ direction }, floor) =>
-        switch direction {
-            | MovingTo(targetFloor) => targetFloor === floor
-            | Waiting => false
+module Make = (F: FLOOR) => {
+    type t =
+        | StandsAt(F.t)
+        | MovingTo(F.t, F.t);
+
+    let empty = StandsAt(F.empty);
+
+    let tick = elevator =>
+        switch elevator {
+            | MovingTo(currFloor, targetFloor)
+                if currFloor !== F.moveToward(currFloor, targetFloor)
+                => MovingTo(F.moveToward(currFloor, targetFloor), targetFloor)
+            | MovingTo(currFloor, _)
+            | StandsAt(currFloor) => StandsAt(currFloor)
         }
 
-    let isCurrentFloor = ({ currentFloor }, floor) =>
-        floor === currentFloor
-
-    let isRequested = ({ requestedFloor }, floor) =>
-        switch requestedFloor {
-            | Some(requested) => floor == requested
-            | None => false
+    let requestFloor = (elevator, requested) =>
+        switch elevator {
+            | StandsAt(currFloor)
+                if currFloor != requested
+                => MovingTo(currFloor, requested)
+            | MovingTo(_, _)
+            | StandsAt(_) => elevator
         }
 
-    let isOpen = ({ currentFloor, direction }, floor) =>
-        direction === Waiting
-        && floor == currentFloor
-}
-
-let startMoveIfRequested = ({ direction, currentFloor, requestedFloor }) =>
-    switch (requestedFloor, direction) {
-        | (Some(requested), Waiting) =>
-            {
-                direction: MovingTo(requested),
-                requestedFloor: None,
-                currentFloor,
+    module Selector = {
+        let isTargetFloor = (elevator, floor) =>
+            switch elevator {
+                | MovingTo(_, targetFloor) => targetFloor == floor
+                | StandsAt(_) => false
             }
-        | _ => ({ direction, currentFloor, requestedFloor })
+
+        let isCurrentFloor = (elevator, floor) =>
+            switch elevator {
+                | MovingTo(currFloor, _)
+                | StandsAt(currFloor) => currFloor == floor
+            }
+
+        let isOpen = (elevator) =>
+            switch elevator {
+                | StandsAt(_) => true
+                | MovingTo(_, _) => false
+            }
     }
-
-let getShift = ({ direction, currentFloor }) =>
-    switch direction {
-        | MovingTo(targetFloor) if targetFloor < currentFloor => -1
-        | MovingTo(targetFloor) if targetFloor > currentFloor => 1
-        | Waiting | MovingTo(_) => 0
-    }
-
-let applyShift = (shift, { direction, currentFloor, requestedFloor }) =>
-    {
-        direction: shift === 0 ? Waiting : direction,
-        currentFloor: currentFloor->Floor.shiftBy(shift),
-        requestedFloor,
-    };
-
-let shiftIfMoving = elevator =>
-    elevator
-    ->getShift
-    ->applyShift(elevator)
-
-let tick = elevator =>
-    elevator
-    ->startMoveIfRequested
-    ->shiftIfMoving
-
-let requestFloor = (elevator, requested) =>
-    switch elevator.requestedFloor {
-        | None => { ...elevator, requestedFloor: requested }
-        | Some(_) => elevator
-    }
+}

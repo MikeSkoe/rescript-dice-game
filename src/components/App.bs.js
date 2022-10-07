@@ -4,7 +4,6 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Floor from "../domain/floor.bs.js";
 import * as State from "../domain/state.bs.js";
 import * as React from "react";
-import * as Elevator from "../domain/elevator.bs.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 
 import './app.css'
@@ -31,9 +30,7 @@ function classnames(_list, _acc) {
 function App$FloorComp(Props) {
   var floor = Props.floor;
   var isTarget = Props.isTarget;
-  var withElevator = Props.withElevator;
-  var isRequested = Props.isRequested;
-  var isOpen = Props.isOpen;
+  var isCurrent = Props.isCurrent;
   var dispatch = Props.dispatch;
   return React.createElement("div", {
               className: classnames({
@@ -43,27 +40,15 @@ function App$FloorComp(Props) {
                     ],
                     tl: {
                       hd: [
-                        "open",
-                        isOpen
+                        "target",
+                        isTarget
                       ],
                       tl: {
                         hd: [
-                          "target",
-                          isTarget
+                          "current",
+                          isCurrent
                         ],
-                        tl: {
-                          hd: [
-                            "requested",
-                            isRequested
-                          ],
-                          tl: {
-                            hd: [
-                              "with-elevator",
-                              withElevator
-                            ],
-                            tl: /* [] */0
-                          }
-                        }
+                        tl: /* [] */0
                       }
                     }
                   }, ""),
@@ -79,8 +64,44 @@ var FloorComp = {
   make: App$FloorComp
 };
 
+function App$FloorsRaw(Props) {
+  var children = Props.children;
+  return React.createElement("div", {
+              className: "floorsRaw"
+            }, Belt_Array.reverse(Belt_Array.mapWithIndex(Belt_Array.make(10, undefined), (function (index, param) {
+                        return Curry._1(children, Floor.make(index));
+                      }))));
+}
+
+var FloorsRaw = {
+  make: App$FloorsRaw
+};
+
+function App$ElevatorComp(Props) {
+  var isOpen = Props.isOpen;
+  return React.createElement("div", {
+              className: classnames({
+                    hd: [
+                      "elevator",
+                      true
+                    ],
+                    tl: {
+                      hd: [
+                        "open",
+                        isOpen
+                      ],
+                      tl: /* [] */0
+                    }
+                  }, "")
+            });
+}
+
+var ElevatorComp = {
+  make: App$ElevatorComp
+};
+
 function App(Props) {
-  var match = React.useReducer(State.reducer, State.empty);
+  var match = React.useReducer(State.reducer, State.AppState.empty);
   var dispatch = match[1];
   var state = match[0];
   React.useEffect((function () {
@@ -92,18 +113,21 @@ function App(Props) {
                     
                   });
         }), []);
-  return React.createElement("div", undefined, Belt_Array.reverse(Belt_Array.map(Belt_Array.mapWithIndex(Belt_Array.make(10, undefined), (function (index, param) {
-                            return Floor.ofInt(index);
-                          })), (function (floor) {
-                        return React.createElement(App$FloorComp, {
-                                    floor: floor,
-                                    isTarget: Elevator.Get.isTargetFloor(state, floor),
-                                    withElevator: Elevator.Get.isCurrentFloor(state, floor),
-                                    isRequested: Elevator.Get.isRequested(state, floor),
-                                    isOpen: Elevator.Get.isOpen(state, floor),
-                                    dispatch: dispatch
-                                  });
-                      }))));
+  return React.createElement("div", {
+              className: "app"
+            }, React.createElement(App$FloorsRaw, {
+                  children: (function (floor) {
+                      return React.createElement(App$FloorComp, {
+                                  floor: floor,
+                                  isTarget: Curry._2(State.AppState.Selector.isTargetFloor, state, floor),
+                                  isCurrent: Curry._2(State.AppState.Selector.isCurrentFloor, state, floor),
+                                  dispatch: dispatch,
+                                  key: Floor.toString(floor)
+                                });
+                    })
+                }), React.createElement(App$ElevatorComp, {
+                  isOpen: Curry._1(State.AppState.Selector.isOpen, state)
+                }));
 }
 
 var List;
@@ -112,14 +136,22 @@ var $$Array;
 
 var Int;
 
+var AppState;
+
+var Selector;
+
 var make = App;
 
 export {
   List ,
   $$Array ,
   Int ,
+  AppState ,
+  Selector ,
   classnames ,
   FloorComp ,
+  FloorsRaw ,
+  ElevatorComp ,
   make ,
   
 }

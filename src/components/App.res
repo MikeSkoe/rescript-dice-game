@@ -3,23 +3,24 @@
 module List = Belt.List
 module Array = Belt.Array
 module Int = Belt.Int
+module AppState = State.AppState
+module Selector = State.AppState.Selector
 
-let rec classnames = (list: list<(string, bool)>, acc: string): string => switch list {
-    | list{} => acc
-    | list{(_, false), ...tail} => classnames(tail, acc)
-    | list{(className, true), ...tail} => classnames(tail, `${acc} ${className}`)
-}
+let rec classnames = (list, acc) =>
+    switch list {
+        | list{} => acc
+        | list{(_, false), ...tail} => classnames(tail, acc)
+        | list{(className, true), ...tail} => classnames(tail, `${acc} ${className}`)
+    }
 
 module FloorComp = {
     @react.component
-    let make = (~floor, ~isTarget, ~withElevator, ~isRequested, ~isOpen, ~dispatch) => {
+    let make = (~floor, ~isTarget, ~isCurrent, ~dispatch) => {
         <div 
             className={classnames(list{
                 ("floor", true),
-                ("open", isOpen),
                 ("target", isTarget),
-                ("requested", isRequested),
-                ("with-elevator", withElevator),
+                ("current", isCurrent)
             }, "")}
             onClick={_ => State.RequestFloor(floor)->dispatch}
         >
@@ -28,9 +29,35 @@ module FloorComp = {
     }
 }
 
+module FloorsRaw = {
+    @react.component
+    let make = (~children) => {
+        <div className="floorsRaw">
+            {Array.make(10, ())
+                ->Array.mapWithIndex((index, _) => children(Floor.make(index)))
+                ->Array.reverse
+                ->React.array
+            }
+        </div>
+    }
+}
+
+module ElevatorComp = {
+    @react.component
+    let make = (~isOpen) => {
+        <div
+            className={classnames(list{
+                ("elevator", true),
+                ("open", isOpen),
+            }, "")}
+        >
+        </div>
+    }
+}
+
 @react.component
 let make = () => {
-    let (state, dispatch) = React.useReducer(State.reducer, State.empty);
+    let (state, dispatch) = React.useReducer(State.reducer, AppState.empty);
 
     React.useEffect0(
         () => {
@@ -40,21 +67,18 @@ let make = () => {
         },
     )
 
-    <div>
-        {Array.make(10,())
-            ->Array.mapWithIndex((index, _) => Floor.ofInt(index))
-            ->Array.map(floor =>
+    <div className="app">
+        <FloorsRaw>
+            {floor => 
                 <FloorComp
+                    key={Floor.toString(floor)}
                     floor={floor}
-                    isTarget={state->Elevator.Get.isTargetFloor(floor)}
-                    withElevator={state->Elevator.Get.isCurrentFloor(floor)}
-                    isRequested={state->Elevator.Get.isRequested(floor)}
-                    isOpen={state->Elevator.Get.isOpen(floor)}
+                    isTarget={state->Selector.isTargetFloor(floor)}
+                    isCurrent={state->Selector.isCurrentFloor(floor)}
                     dispatch={dispatch}
                 />
-            )
-            ->Array.reverse
-            ->React.array
-        }
+            }
+        </FloorsRaw>
+        <ElevatorComp isOpen={state->Selector.isOpen} />
     </div>
 }

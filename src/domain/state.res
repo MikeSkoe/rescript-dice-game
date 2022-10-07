@@ -1,13 +1,15 @@
-type t = Elevator.t;
+module AppState = Elevator.Make(Floor);
+
+type t = AppState.t;
 
 type action =
     | Tick
     | RequestFloor(Floor.t);
 
-let empty = Elevator.empty;
+let empty = AppState.empty;
 
 let reducer = (state, action) =>
     switch action {
-        | Tick => Elevator.tick(state)
-        | RequestFloor(floor) => Elevator.requestFloor(state, Some(floor))
+        | Tick => AppState.tick(state)
+        | RequestFloor(floor) => AppState.requestFloor(state, floor)
     };
